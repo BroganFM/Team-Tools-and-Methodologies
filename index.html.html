@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Tools & Methodologies</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f4ef;
+  --ink: #111111;
+  --muted: #777777;
+  --border: #ddd9d0;
+
+  /* Brand palette — same across all diagrams */
+  --forest:   #1a3a2a;
+  --amber:    #6b3d0e;
+  --plum:     #3d1a2e;
+  --navy:     #1a2040;
+  --teal:     #0d4a4a;
+  --rust:     #7a2d0e;
+  --sage:     #3a4a2a;
+  --slate:    #2a3a4a;
+
+  --forest-l: #e8f5ee;
+  --amber-l:  #fdf3e3;
+  --plum-l:   #f5e8f0;
+  --navy-l:   #e8eaf5;
+  --teal-l:   #e0f0f0;
+  --rust-l:   #fdeee8;
+  --sage-l:   #edf2e8;
+  --slate-l:  #e8edf2;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(247,244,239,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.nav-inner {
+  display: inline-flex;
+  gap: 2px;
+  padding: 8px 0;
+  min-width: 100%;
+}
+.nav-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-btn:hover { color: var(--ink); border-color: var(--border); }
+.nav-btn.active { background: var(--forest); color: white; border-color: var(--forest); }
+
+/* PANELS */
+.panel { display: none; padding: 48px 24px 64px; max-width: 860px; margin: 0 auto; }
+.panel.active { display: block; }
+
+/* PANEL HEADER */
+.panel-header { margin-bottom: 36px; animation: fadeDown 0.5s ease both; }
+.panel-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.panel-header p {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
+/* SHARED QUAD GRID */
+.quad-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  position: relative;
+}
+.quad-grid::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: -16px; bottom: -16px;
+  width: 1.5px;
+  background: linear-gradient(to bottom, transparent, var(--border), transparent);
+  pointer-events: none;
+}
+.quad-grid::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: -16px; right: -16px;
+  height: 1.5px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+  pointer-events: none;
+}
+
+.qcard {
+  border-radius: 4px;
+  padding: clamp(16px, 3vw, 26px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  animation: fadeIn 0.45s ease both;
+  position: relative;
+  overflow: hidden;
+}
+.qcard:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.11); z-index: 2; }
+
+.qcard-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: 0.65;
+}
+.qcard-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+.qcard-desc {
+  font-size: clamp(0.75rem, 1.3vw, 0.86rem);
+  line-height: 1.55;
+  font-weight: 300;
+  flex-grow: 1;
+}
+.qcard-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 12px;
+}
+.qtag {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* Dark card variant */
+.qcard.dark { color: white; }
+.qcard.dark .qcard-desc { color: rgba(255,255,255,0.82); }
+.qcard.dark .qtag { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.22); }
+.qcard.dark .qcard-eyebrow { color: rgba(255,255,255,0.7); }
+
+.star { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+/* AXIS LABELS */
+.axis-wrap {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  grid-template-rows: 1fr 28px;
+  gap: 10px;
+  width: 100%;
+}
+.axis-y {
+  grid-column: 1; grid-row: 1;
+  display: flex; align-items: center; justify-content: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.65rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #555;
+}
+.axis-x {
+  grid-column: 2; grid-row: 2;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #555;
+}
+.axis-content { grid-column: 2; grid-row: 1; }
+
+/* ========================
+   HATS — radial
+======================== */
+.hats-ring {
+  position: relative;
+  width: min(520px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease both;
+}
+.hat-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  background: var(--forest);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  color: white;
+  z-index: 5;
+  box-shadow: 0 8px 32px rgba(26,58,42,0.35);
+}
+.hat-center-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; line-height: 1.2; }
+.hat-center-sub { font-size: 0.62rem; opacity: 0.7; margin-top: 4px; letter-spacing: 0.5px; }
+
+.hat-segment {
+  position: absolute;
+  width: 160px;
+  border-radius: 6px;
+  padding: 14px 15px;
+  display: flex; flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hat-segment:hover { transform: scale(1.04); box-shadow: 0 10px 28px rgba(0,0,0,0.13); z-index: 10; }
+
+.hat-icon { font-size: 1.4rem; margin-bottom: 5px; }
+.hat-name { font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+.hat-role { font-size: 0.65rem; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; opacity: 0.65; margin-bottom: 5px; }
+.hat-desc { font-size: 0.7rem; line-height: 1.45; font-weight: 300; }
+
+/* ========================
+   CYNEFIN — irregular
+======================== */
+.cynefin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 80px 1fr;
+  gap: 8px;
+  min-height: 480px;
+}
+.c-domain {
+  border-radius: 4px;
+  padding: clamp(14px, 2.5vw, 22px);
+  display: flex; flex-direction: column; justify-content: space-between;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  animation: fadeIn 0.45s ease both;
+}
+.c-domain:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); z-index: 2; }
+.c-chaos {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  border-radius: 4px;
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.c-domain-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6; margin-bottom: 5px; }
+.c-domain-title { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 700; margin-bottom: 8px; line-height: 1.2; }
+.c-domain-approach { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 8px; opacity: 0.75; }
+.c-domain-desc { font-size: clamp(0.72rem, 1.2vw, 0.82rem); line-height: 1.5; font-weight: 300; }
+
+/* ========================
+   5 WHYS — chain
+======================== */
+.whys-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeIn 0.5s ease both;
+}
+.why-item {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  animation: fadeIn 0.4s ease both;
+}
+.why-item:nth-child(1) { animation-delay: 0s; }
+.why-item:nth-child(2) { animation-delay: 0.1s; }
+.why-item:nth-child(3) { animation-delay: 0.2s; }
+.why-item:nth-child(4) { animation-delay: 0.3s; }
+.why-item:nth-child(5) { animation-delay: 0.4s; }
+.why-item:nth-child(6) { animation-delay: 0.5s; }
+
+.why-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 36px;
+}
+.why-circle {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--forest);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.why-line {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--forest), var(--border));
+  margin: 4px 0;
+  min-height: 16px;
+}
+.why-content {
+  flex: 1;
+  padding-bottom: 24px;
+}
+.why-q { font-size: 0.68rem; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.why-a { font-size: 0.9rem; line-height: 1.5; font-weight: 400; color: var(--ink); }
+.why-root {
+  background: var(--forest);
+  color: white;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-top: -4px;
+}
+.why-root .why-q { color: rgba(255,255,255,0.65); }
+.why-root .why-a { color: white; font-weight: 500; }
+
+/* ========================
+   FISHBONE
+======================== */
+.fishbone-wrap {
+  padding: 20px 0;
+  animation: fadeIn 0.5s ease both;
+}
+.fishbone-svg { width: 100%; overflow: visible; }
+
+/* ========================
+   JOHARI
+======================== */
+
+/* ========================
+   RACI
+======================== */
+.raci-table-wrap {
+  overflow-x: auto;
+  animation: fadeIn 0.5s ease both;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.raci-table { width: 100%; border-collapse: collapse; }
+.raci-table th, .raci-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.83rem;
+}
+.raci-table th {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: white;
+  background: var(--forest);
+}
+.raci-table th:first-child { border-radius: 5px 0 0 0; }
+.raci-table th:last-child { border-radius: 0 5px 0 0; }
+.raci-table tr:last-child td { border-bottom: none; }
+.raci-table tr:nth-child(even) td { background: rgba(26,58,42,0.03); }
+.raci-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: 0.75rem; font-weight: 700;
+}
+.raci-R { background: var(--forest-l); color: var(--forest); }
+.raci-A { background: var(--forest); color: white; }
+.raci-C { background: var(--amber-l); color: var(--amber); }
+.raci-I { background: var(--navy-l); color: var(--navy); }
+.raci-legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+.raci-legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
+
+/* ========================
+   AAR — cycle
+======================== */
+.aar-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  animation: fadeIn 0.5s ease both;
+}
+.aar-step {
+  border-radius: 4px;
+  padding: clamp(16px, 2.5vw, 24px);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeIn 0.4s ease both;
+}
+.aar-step:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+.aar-num { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; opacity: 0.15; position: absolute; top: 10px; right: 16px; line-height: 1; }
+.aar-question { font-family: 'Playfair Display', serif; font-size: clamp(0.95rem, 1.8vw, 1.15rem); font-weight: 700; margin-bottom: 8px; line-height: 1.2; }
+.aar-desc { font-size: 0.82rem; line-height: 1.5; font-weight: 300; }
+
+/* ========================
+   PRE-MORTEM
+======================== */
+.pm-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.5s ease both;
+}
+.pm-step {
+  border-radius: 4px;
+  padding: 18px 22px;
+  display: flex; gap: 18px; align-items: flex-start;
+  animation: fadeIn 0.4s ease both;
+  transition: transform 0.2s ease;
+}
+.pm-step:hover { transform: translateX(4px); }
+.pm-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.pm-body { flex: 1; }
+.pm-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+.pm-desc { font-size: 0.82rem; line-height: 1.5; font-weight: 300; }
+.pm-arrow { text-align: center; font-size: 1.1rem; color: var(--border); padding: 2px 0; }
+
+/* ========================
+   NVC — 4 steps
+======================== */
+.nvc-flow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  animation: fadeIn 0.5s ease both;
+}
+.nvc-step {
+  border-radius: 4px;
+  padding: clamp(16px, 2.5vw, 24px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeIn 0.4s ease both;
+  position: relative;
+  overflow: hidden;
+}
+.nvc-step:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+.nvc-letter { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; opacity: 0.1; position: absolute; top: 6px; right: 14px; line-height: 1; }
+.nvc-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6; margin-bottom: 5px; }
+.nvc-title { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 2vw, 1.2rem); font-weight: 700; margin-bottom: 8px; line-height: 1.2; }
+.nvc-desc { font-size: 0.81rem; line-height: 1.5; font-weight: 300; }
+.nvc-example { margin-top: 10px; font-size: 0.75rem; font-style: italic; opacity: 0.72; line-height: 1.4; border-left: 2px solid currentColor; padding-left: 8px; }
+
+/* ========================
+   POINT AND CALL
+======================== */
+.pac-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeIn 0.5s ease both;
+}
+.pac-step {
+  display: flex; gap: 16px; align-items: stretch;
+  animation: fadeIn 0.4s ease both;
+}
+.pac-icon-col {
+  display: flex; flex-direction: column; align-items: center; width: 50px; flex-shrink: 0;
+}
+.pac-icon {
+  width: 50px; height: 50px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.pac-connector { flex: 1; width: 2px; background: var(--border); margin: 4px 0; }
+.pac-body { flex: 1; padding-bottom: 20px; }
+.pac-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+.pac-desc { font-size: 0.82rem; line-height: 1.5; font-weight: 300; color: #444; }
+.pac-stat {
+  display: inline-block; margin-top: 8px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px;
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--forest-l); color: var(--forest);
+}
+
+/* ANIMATIONS */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn   { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+
+/* INTRO PAGE */
+.intro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 32px;
+}
+.intro-card {
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  animation: fadeIn 0.4s ease both;
+}
+.intro-card:hover { border-color: var(--forest); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+.intro-card-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.intro-card-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+.intro-card-cat { font-size: 0.65rem; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="show('intro')">All Tools</button>
+    <button class="nav-btn" onclick="show('rc')">Radical Candour</button>
+    <button class="nav-btn" onclick="show('johari')">Johari Window</button>
+    <button class="nav-btn" onclick="show('swot')">SWOT</button>
+    <button class="nav-btn" onclick="show('hats')">6 Thinking Hats</button>
+    <button class="nav-btn" onclick="show('whys')">5 Whys</button>
+    <button class="nav-btn" onclick="show('pac')">Point & Call</button>
+    <button class="nav-btn" onclick="show('fishbone')">Fishbone</button>
+    <button class="nav-btn" onclick="show('aar')">After Action Review</button>
+    <button class="nav-btn" onclick="show('cynefin')">Cynefin</button>
+    <button class="nav-btn" onclick="show('raci')">RACI</button>
+    <button class="nav-btn" onclick="show('premortem')">Pre-mortem</button>
+    <button class="nav-btn" onclick="show('nvc')">NVC</button>
+  </div>
+</nav>
+
+<!-- INTRO -->
+<div class="panel active" id="intro">
+  <div class="panel-header">
+    <h1>Team Tools & Methodologies</h1>
+    <p>A visual reference for 12 practical frameworks — click any tool to explore</p>
+  </div>
+  <div class="intro-grid">
+    <div class="intro-card" onclick="show('rc')" style="animation-delay:0.0s"><div class="intro-card-icon">💬</div><div class="intro-card-title">Radical Candour</div><div class="intro-card-cat">Feedback & Communication</div></div>
+    <div class="intro-card" onclick="show('johari')" style="animation-delay:0.05s"><div class="intro-card-icon">🪟</div><div class="intro-card-title">Johari Window</div><div class="intro-card-cat">Self-awareness & Trust</div></div>
+    <div class="intro-card" onclick="show('swot')" style="animation-delay:0.1s"><div class="intro-card-icon">🧭</div><div class="intro-card-title">SWOT Analysis</div><div class="intro-card-cat">Strategy & Planning</div></div>
+    <div class="intro-card" onclick="show('hats')" style="animation-delay:0.15s"><div class="intro-card-icon">🎩</div><div class="intro-card-title">Six Thinking Hats</div><div class="intro-card-cat">Decision Making</div></div>
+    <div class="intro-card" onclick="show('whys')" style="animation-delay:0.2s"><div class="intro-card-icon">🔍</div><div class="intro-card-title">The 5 Whys</div><div class="intro-card-cat">Root Cause Analysis</div></div>
+    <div class="intro-card" onclick="show('pac')" style="animation-delay:0.25s"><div class="intro-card-icon">👆</div><div class="intro-card-title">Point & Call</div><div class="intro-card-cat">Error Prevention</div></div>
+    <div class="intro-card" onclick="show('fishbone')" style="animation-delay:0.3s"><div class="intro-card-icon">🐟</div><div class="intro-card-title">Fishbone Diagram</div><div class="intro-card-cat">Root Cause Analysis</div></div>
+    <div class="intro-card" onclick="show('aar')" style="animation-delay:0.35s"><div class="intro-card-icon">🔄</div><div class="intro-card-title">After Action Review</div><div class="intro-card-cat">Learning & Reflection</div></div>
+    <div class="intro-card" onclick="show('cynefin')" style="animation-delay:0.4s"><div class="intro-card-icon">🗺️</div><div class="intro-card-title">Cynefin Framework</div><div class="intro-card-cat">Sense-making</div></div>
+    <div class="intro-card" onclick="show('raci')" style="animation-delay:0.45s"><div class="intro-card-icon">📋</div><div class="intro-card-title">RACI Matrix</div><div class="intro-card-cat">Ownership & Clarity</div></div>
+    <div class="intro-card" onclick="show('premortem')" style="animation-delay:0.5s"><div class="intro-card-icon">💀</div><div class="intro-card-title">Pre-mortem</div><div class="intro-card-cat">Risk & Planning</div></div>
+    <div class="intro-card" onclick="show('nvc')" style="animation-delay:0.55s"><div class="intro-card-icon">🕊️</div><div class="intro-card-title">Nonviolent Communication</div><div class="intro-card-cat">Conflict & Connection</div></div>
+  </div>
+</div>
+
+<!-- RADICAL CANDOUR -->
+<div class="panel" id="rc">
+  <div class="panel-header"><h1>Radical Candour</h1><p>Care Personally · Challenge Directly · Kim Scott, 2017</p></div>
+  <div class="axis-wrap">
+    <div class="axis-y">Care Personally ↑</div>
+    <div class="axis-content">
+      <div class="quad-grid">
+        <div class="qcard" style="background:var(--amber-l);border:1.5px solid #d9c09a;animation-delay:0.15s">
+          <div><div class="qcard-eyebrow" style="color:var(--amber)">High Care · Low Challenge</div><div class="qcard-title" style="color:var(--amber)">Ruinous Empathy</div><div class="qcard-desc" style="color:#5a3d10">You care too much to say the hard thing. Feedback is softened until it's meaningless — and the person never gets the chance to improve.</div></div>
+          <div class="qcard-tags"><span class="qtag" style="background:rgba(107,61,14,0.1);color:var(--amber);border:1px solid rgba(107,61,14,0.25)">Avoidance</span><span class="qtag" style="background:rgba(107,61,14,0.1);color:var(--amber);border:1px solid rgba(107,61,14,0.25)">False Kindness</span><span class="qtag" style="background:rgba(107,61,14,0.1);color:var(--amber);border:1px solid rgba(107,61,14,0.25)">Most Common</span></div>
+        </div>
+        <div class="qcard dark" style="background:var(--forest);border:2px solid var(--forest);box-shadow:0 8px 32px rgba(26,58,42,0.28);animation-delay:0s">
+          <div class="star">★</div>
+          <div><div class="qcard-eyebrow">High Care · High Challenge</div><div class="qcard-title">Radical Candour</div><div class="qcard-desc">The sweet spot. You care about the person and you tell them the truth — specifically, promptly, and in service of their growth.</div></div>
+          <div class="qcard-tags"><span class="qtag">The Goal</span><span class="qtag">Trust-Building</span><span class="qtag">Growth</span></div>
+        </div>
+        <div class="qcard" style="background:var(--navy-l);border:1.5px solid #b0b5d0;animation-delay:0.3s">
+          <div><div class="qcard-eyebrow" style="color:var(--navy)">Low Care · Low Challenge</div><div class="qcard-title" style="color:var(--navy)">Manipulative Insincerity</div><div class="qcard-desc" style="color:#1a2060">Vague, uncommitted feedback designed to avoid conflict. You don't care enough to be honest or challenge enough to be useful.</div></div>
+          <div class="qcard-tags"><span class="qtag" style="background:rgba(26,32,64,0.1);color:var(--navy);border:1px solid rgba(26,32,64,0.25)">Worst Quadrant</span><span class="qtag" style="background:rgba(26,32,64,0.1);color:var(--navy);border:1px solid rgba(26,32,64,0.25)">Political</span><span class="qtag" style="background:rgba(26,32,64,0.1);color:var(--navy);border:1px solid rgba(26,32,64,0.25)">Corrosive</span></div>
+        </div>
+        <div class="qcard" style="background:var(--plum-l);border:1.5px solid #c9a0be;animation-delay:0.2s">
+          <div><div class="qcard-eyebrow" style="color:var(--plum)">Low Care · High Challenge</div><div class="qcard-title" style="color:var(--plum)">Obnoxious Aggression</div><div class="qcard-desc" style="color:#3d1030">Brutal honesty without warmth. Feedback that stings but doesn't help — the person doesn't feel safe enough to hear it.</div></div>
+          <div class="qcard-tags"><span class="qtag" style="background:rgba(61,26,46,0.1);color:var(--plum);border:1px solid rgba(61,26,46,0.25)">Bluntness</span><span class="qtag" style="background:rgba(61,26,46,0.1);color:var(--plum);border:1px solid rgba(61,26,46,0.25)">No Empathy</span><span class="qtag" style="background:rgba(61,26,46,0.1);color:var(--plum);border:1px solid rgba(61,26,46,0.25)">Defensive</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="axis-x">Challenge Directly →</div>
+  </div>
+</div>
+
+<!-- JOHARI WINDOW -->
+<div class="panel" id="johari">
+  <div class="panel-header"><h1>The Johari Window</h1><p>Luft & Ingham, 1955 · Expanding mutual awareness through disclosure and feedback</p></div>
+  <div class="axis-wrap">
+    <div class="axis-y">Known to Self ↑</div>
+    <div class="axis-content">
+      <div class="quad-grid">
+        <div class="qcard dark" style="background:var(--forest);border:2px solid var(--forest);box-shadow:0 8px 28px rgba(26,58,42,0.25);animation-delay:0s">
+          <div class="star">↔</div>
+          <div><div class="qcard-eyebrow">Known to Self · Known to Others</div><div class="qcard-title">Open Arena</div><div class="qcard-desc">Shared, visible information. The larger this quadrant grows, the more effective your communication and collaboration becomes. Expand it through disclosure and feedback.</div></div>
+          <div class="qcard-tags"><span class="qtag">Transparency</span><span class="qtag">Expand This</span><span class="qtag">Shared Trust</span></div>
+        </div>
+        <div class="qcard" style="background:var(--amber-l);border:1.5px solid #d9c09a;animation-delay:0.1s">
+          <div><div class="qcard-eyebrow" style="color:var(--amber)">Unknown to Self · Known to Others</div><div class="qcard-title" style="color:var(--amber)">Blind Spot</div><div class="qcard-desc" style="color:#5a3d10">What others can see about you that you can't see in yourself — habits, impact, patterns. Revealed through honest feedback. Often the most valuable quadrant to explore.</div></div>
+          <div class="qcard-tags"><span class="qtag" style="background:rgba(107,61,14,0.1);color:var(--amber);border:1px solid rgba(107,61,14,0.25)">Feedback Needed</span><span class="qtag" style="background:rgba(107,61,14,0.1);color:var(--amber);border:1px solid rgba(107,61,14,0.25)">Hidden Impact</span></div>
+        </div>
+        <div class="qcard" style="background:var(--teal-l);border:1.5px solid #90c8c8;animation-delay:0.2s">
+          <div><div class="qcard-eyebrow" style="color:var(--teal)">Known to Self · Unknown to Others</div><div class="qcard-title" style="color:var(--teal)">Façade</div><div class="qcard-desc" style="color:#0d3030">What you know about yourself but choose not to share. Reducing the Façade through deliberate disclosure builds trust and invites reciprocal openness from others.</div></div>
+          <div class="qcard-tags"><span class="qtag" style="background:rgba(13,74,74,0.1);color:var(--teal);border:1px solid rgba(13,74,74,0.25)">Hidden Self</span><span class="qtag" style="background:rgba(13,74,74,0.1);color:var(--teal);border:1px solid rgba(13,74,74,0.25)">Disclosure Key</span></div>
+        </div>
+        <div class="qcard" style="background:var(--navy-l);border:1.5px solid #b0b5d0;animation-delay:0.3s">
+          <div><div class="qcard-eyebrow" style="color:var(--navy)">Unknown to Self · Unknown to Others</div><div class="qcard-title" style="color:var(--navy)">Unknown</div><div class="qcard-desc" style="color:#1a2060">Undiscovered potential, unconscious behaviours, latent talents. Revealed gradually through new experiences, deep reflection, and psychological safety in a team.</div></div>
+          <div class="qcard-tags"><span class="qtag" style="background:rgba(26,32,64,0.1);color:var(--navy);border:1px solid rgba(26,32,64,0.25)">Potential</span><span class="qtag" style="background:rgba(26,32,64,0.1);color:var(--navy);border:1px solid rgba(26,32,64,0.25)">Unconscious</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="axis-x">Known to Others →</div>
+  </div>
+</div>
+
+<!-- SWOT -->
+<div class="panel" id="swot">
+  <div class="panel-header"><h1>SWOT Analysis</h1><p>Stanford Research Institute, 1960s · Internal capability meets external reality</p></div>
+  <div style="display:flex;gap:12px;margin-bottom:10px;">
+    <div style="flex:1;text-align:center;font-size:0.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--forest);padding:6px;background:var(--forest-l);border-radius:4px;">INTERNAL</div>
+    <div style="flex:1;text-align:center;font-size:0.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--rust);padding:6px;background:var(--rust-l);border-radius:4px;">EXTERNAL</div>
+  </div>
+  <div class="quad-grid">
+    <div class="qcard dark" style="background:var(--forest);border:2px solid var(--forest);box-shadow:0 6px 24px rgba(26,58,42,0.22);animation-delay:0s">
+      <div><div class="qcard-eyebrow">Internal · Helpful</div><div class="qcard-title">Strengths</div><div class="qcard-desc">What do you genuinely do well? What advantages do you have that others don't? Be honest — not just comfortable.</div></div>
+      <div class="qcard-tags"><span class="qtag">Internal</span><span class="qtag">Leverage These</span></div>
+    </div>
+    <div class="qcard" style="background:var(--rust-l);border:1.5px solid #d4a090;animation-delay:0.1s">
+      <div><div class="qcard-eyebrow" style="color:var(--rust)">External · Helpful</div><div class="qcard-title" style="color:var(--rust)">Opportunities</div><div class="qcard-desc" style="color:#4a1a08">External trends, market gaps, or shifts in context that could work in your favour. What's emerging that you can move toward?</div></div>
+      <div class="qcard-tags"><span class="qtag" style="background:rgba(122,45,14,0.1);color:var(--rust);border:1px solid rgba(122,45,14,0.25)">External</span><span class="qtag" style="background:rgba(122,45,14,0.1);color:var(--rust);border:1px solid rgba(122,45,14,0.25)">Pursue These</span></div>
+    </div>
+    <div class="qcard" style="background:var(--sage-l);border:1.5px solid #a8c090;animation-delay:0.2s">
+      <div><div class="qcard-eyebrow" style="color:var(--sage)">Internal · Harmful</div><div class="qcard-title" style="color:var(--sage)">Weaknesses</div><div class="qcard-desc" style="color:#2a3a1a">Where are your real gaps? What do customers or competitors notice that you're avoiding? The hardest quadrant to fill honestly.</div></div>
+      <div class="qcard-tags"><span class="qtag" style="background:rgba(58,74,42,0.1);color:var(--sage);border:1px solid rgba(58,74,42,0.25)">Internal</span><span class="qtag" style="background:rgba(58,74,42,0.1);color:var(--sage);border:1px solid rgba(58,74,42,0.25)">Address These</span></div>
+    </div>
+    <div class="qcard" style="background:var(--plum-l);border:1.5px solid #c9a0be;animation-delay:0.3s">
+      <div><div class="qcard-eyebrow" style="color:var(--plum)">External · Harmful</div><div class="qcard-title" style="color:var(--plum)">Threats</div><div class="qcard-desc" style="color:#3d1030">External pressures, competitive moves, or environmental changes that could undermine your position. What's working against you?</div></div>
+      <div class="qcard-tags"><span class="qtag" style="background:rgba(61,26,46,0.1);color:var(--plum);border:1px solid rgba(61,26,46,0.25)">External</span><span class="qtag" style="background:rgba(61,26,46,0.1);color:var(--plum);border:1px solid rgba(61,26,46,0.25)">Monitor These</span></div>
+    </div>
+  </div>
+  <div style="margin-top:16px;padding:14px 18px;background:var(--forest-l);border-radius:4px;border-left:3px solid var(--forest);">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--forest);margin-bottom:6px;">SWOT Matching — the real value</div>
+    <div style="font-size:0.8rem;color:#2a4a2a;line-height:1.55;font-weight:300;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;">
+      <span><strong>SO:</strong> Use Strengths to pursue Opportunities</span>
+      <span><strong>WO:</strong> Shore up Weaknesses to unlock Opportunities</span>
+      <span><strong>ST:</strong> Use Strengths to neutralise Threats</span>
+      <span><strong>WT:</strong> Minimise Weaknesses, avoid Threats</span>
+    </div>
+  </div>
+</div>
+
+<!-- SIX THINKING HATS -->
+<div class="panel" id="hats">
+  <div class="panel-header"><h1>De Bono's Six Thinking Hats</h1><p>Edward de Bono, 1985 · Parallel thinking for richer group decisions</p></div>
+  <div class="hats-ring">
+    <div class="hat-center"><div class="hat-center-title">Parallel Thinking</div><div class="hat-center-sub">Everyone. Same hat. Same time.</div></div>
+    <!-- White — top -->
+    <div class="hat-segment" style="background:#f8f8f2;border:1.5px solid #ddd;color:#333;top:0%;left:50%;transform:translateX(-50%)">
+      <div class="hat-icon">🤍</div><div class="hat-name" style="color:#555">White Hat</div><div class="hat-role" style="color:#777">Facts & Data</div><div class="hat-desc" style="color:#555">What do we know? What's missing? Neutral, objective. No interpretation.</div>
+    </div>
+    <!-- Green — top right -->
+    <div class="hat-segment" style="background:var(--sage-l);border:1.5px solid #a8c090;top:18%;right:0%;color:var(--sage)">
+      <div class="hat-icon">💚</div><div class="hat-name">Green Hat</div><div class="hat-role">Creativity</div><div class="hat-desc" style="color:#2a3a1a">New ideas. Alternatives. Provocations. No judgement — generate freely.</div>
+    </div>
+    <!-- Blue — top left -->
+    <div class="hat-segment" style="background:var(--navy-l);border:1.5px solid #b0b5d0;top:18%;left:0%;color:var(--navy)">
+      <div class="hat-icon">💙</div><div class="hat-name">Blue Hat</div><div class="hat-role">Process</div><div class="hat-desc" style="color:#1a2060">Facilitator hat. Sets agenda, manages the process, decides which hat is next.</div>
+    </div>
+    <!-- Yellow — right -->
+    <div class="hat-segment" style="background:#fefce8;border:1.5px solid #e8d870;top:50%;right:0%;transform:translateY(-50%);color:#6b5a10">
+      <div class="hat-icon">💛</div><div class="hat-name">Yellow Hat</div><div class="hat-role">Optimism</div><div class="hat-desc" style="color:#5a4a08">Benefits, value, best-case outcomes. Why could this work? Constructive positivity.</div>
+    </div>
+    <!-- Red — left -->
+    <div class="hat-segment" style="background:var(--rust-l);border:1.5px solid #d4a090;top:50%;left:0%;transform:translateY(-50%);color:var(--rust)">
+      <div class="hat-icon">❤️</div><div class="hat-name">Red Hat</div><div class="hat-role">Emotion & Gut</div><div class="hat-desc" style="color:#4a1a08">How do you feel? Instinctive reaction. No justification needed — just honest emotion.</div>
+    </div>
+    <!-- Black — bottom -->
+    <div class="hat-segment" style="background:#1a1a1a;border:1.5px solid #333;color:#eee;bottom:0%;left:50%;transform:translateX(-50%)">
+      <div class="hat-icon">🖤</div><div class="hat-name">Black Hat</div><div class="hat-role" style="color:#aaa">Caution & Risk</div><div class="hat-desc" style="color:#ccc">What could go wrong? Due diligence. Not pessimism — responsible caution.</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;padding:14px 18px;background:var(--forest-l);border-radius:4px;border-left:3px solid var(--forest);">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--forest);margin-bottom:5px;">Facilitator tip</div>
+    <div style="font-size:0.82rem;color:#2a4a2a;font-weight:300;line-height:1.5;">Always open and close with the Blue Hat. Keep each hat to 3–5 minutes. Use the Red Hat early — it legitimises emotion before the analytical hats take over.</div>
+  </div>
+</div>
+
+<!-- 5 WHYS -->
+<div class="panel" id="whys">
+  <div class="panel-header"><h1>The 5 Whys</h1><p>Sakichi Toyoda · Toyota Production System · Keep asking until you hit the system, not the person</p></div>
+  <div class="whys-chain">
+    <div class="why-item">
+      <div class="why-spine"><div class="why-circle" style="background:var(--slate)">P</div><div class="why-line"></div></div>
+      <div class="why-content"><div class="why-q">The Problem</div><div class="why-a">The website went down during peak traffic.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-spine"><div class="why-circle">1</div><div class="why-line"></div></div>
+      <div class="why-content"><div class="why-q">Why?</div><div class="why-a">The server ran out of memory and crashed.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-spine"><div class="why-circle">2</div><div class="why-line"></div></div>
+      <div class="why-content"><div class="why-q">Why?</div><div class="why-a">A new background process was consuming unexpected resources.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-spine"><div class="why-circle">3</div><div class="why-line"></div></div>
+      <div class="why-content"><div class="why-q">Why?</div><div class="why-a">It wasn't tested under production-level load before deployment.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-spine"><div class="why-circle">4</div><div class="why-line"></div></div>
+      <div class="why-content"><div class="why-q">Why?</div><div class="why-a">The team doesn't have a staging environment that mirrors production.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-spine"><div class="why-circle" style="background:var(--rust)">5</div><div class="why-line" style="opacity:0"></div></div>
+      <div class="why-content">
+        <div class="why-root">
+          <div class="why-q">Why? — Root Cause</div>
+          <div class="why-a">A staging environment was cut from last quarter's budget without assessing the operational risk.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="padding:14px 16px;background:var(--sage-l);border-radius:4px;border-left:3px solid var(--sage)"><div style="font-size:0.65rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--sage);margin-bottom:4px;">Do this</div><div style="font-size:0.8rem;color:#2a3a1a;font-weight:300;line-height:1.45;">Stop at the system failure — the process, policy, or decision that made this outcome possible</div></div>
+    <div style="padding:14px 16px;background:var(--rust-l);border-radius:4px;border-left:3px solid var(--rust)"><div style="font-size:0.65rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--rust);margin-bottom:4px;">Never stop here</div><div style="font-size:0.8rem;color:#4a1a08;font-weight:300;line-height:1.45;">"Human error" — this is almost always a symptom of a broken system, not a root cause</div></div>
+  </div>
+</div>
+
+<!-- POINT AND CALL -->
+<div class="panel" id="pac">
+  <div class="panel-header"><h1>Point and Call <em style="font-size:0.6em;font-weight:400;color:var(--muted)">(Shisa Kanko)</em></h1><p>Japanese railway industry, late 19th century · Up to 85% reduction in human error</p></div>
+  <div class="pac-steps">
+    <div class="pac-step" style="animation-delay:0s">
+      <div class="pac-icon-col"><div class="pac-icon" style="background:var(--forest-l)">👁️</div><div class="pac-connector"></div></div>
+      <div class="pac-body"><div class="pac-title" style="color:var(--forest)">1. Look</div><div class="pac-desc">Direct your eyes to the specific item, indicator, or status you are checking. Don't glance — look deliberately. Familiarity is the enemy; treat it as if you're seeing it for the first time.</div></div>
+    </div>
+    <div class="pac-step" style="animation-delay:0.1s">
+      <div class="pac-icon-col"><div class="pac-icon" style="background:var(--teal-l)">☝️</div><div class="pac-connector"></div></div>
+      <div class="pac-body"><div class="pac-title" style="color:var(--teal)">2. Point</div><div class="pac-desc">Extend your arm and point your finger at the item. The physical gesture activates a different neural pathway than vision alone — making the brain engage consciously rather than on autopilot.</div></div>
+    </div>
+    <div class="pac-step" style="animation-delay:0.2s">
+      <div class="pac-icon-col"><div class="pac-icon" style="background:var(--amber-l)">🗣️</div><div class="pac-connector"></div></div>
+      <div class="pac-body"><div class="pac-title" style="color:var(--amber)">3. Call Out</div><div class="pac-desc">Say the status aloud — clearly and specifically. "Deployment target: production. Confirmed." Speaking externalises the check, making it harder to skip and observable by others nearby.</div><div class="pac-stat">Verbal + physical = 2× more brain activation than visual alone</div></div>
+    </div>
+    <div class="pac-step" style="animation-delay:0.3s">
+      <div class="pac-icon-col"><div class="pac-icon" style="background:var(--forest-l)">✅</div></div>
+      <div class="pac-body"><div class="pac-title" style="color:var(--forest)">4. Confirm & Proceed</div><div class="pac-desc">In a team setting, a second person responds to confirm. In a solo context, the act of calling out itself creates the necessary pause. Only then proceed. Never reverse the order.</div><div class="pac-stat">85% error reduction in Japanese railway studies</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FISHBONE -->
+<div class="panel" id="fishbone">
+  <div class="panel-header"><h1>Ishikawa / Fishbone Diagram</h1><p>Kaoru Ishikawa, 1960s · Map all causes before committing to any one of them</p></div>
+  <div class="fishbone-wrap">
+    <svg class="fishbone-svg" viewBox="0 0 780 360" xmlns="http://www.w3.org/2000/svg" font-family="DM Sans, sans-serif">
+      <!-- Main spine -->
+      <line x1="60" y1="180" x2="660" y2="180" stroke="#1a3a2a" stroke-width="3"/>
+      <!-- Arrow head -->
+      <polygon points="660,180 640,170 640,190" fill="#1a3a2a"/>
+      <!-- Effect box -->
+      <rect x="660" y="148" width="110" height="64" rx="4" fill="#1a3a2a"/>
+      <text x="715" y="172" text-anchor="middle" font-size="10" font-weight="600" fill="white" letter-spacing="0.5">THE</text>
+      <text x="715" y="186" text-anchor="middle" font-size="10" font-weight="600" fill="white" letter-spacing="0.5">PROBLEM</text>
+      <text x="715" y="200" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)">clearly stated</text>
+
+      <!-- TOP BONES -->
+      <!-- Man/People -->
+      <line x1="160" y1="180" x2="200" y2="100" stroke="#1a3a2a" stroke-width="2"/>
+      <rect x="108" y="60" width="90" height="36" rx="4" fill="#e8f5ee" stroke="#1a3a2a" stroke-width="1.5"/>
+      <text x="153" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#1a3a2a">People</text>
+      <text x="153" y="89" text-anchor="middle" font-size="9" fill="#2a4a2a">Skills · Training</text>
+      <!-- sub-bones -->
+      <line x1="155" y1="133" x2="175" y2="100" stroke="#6aab8a" stroke-width="1.5"/>
+      <text x="148" y="130" text-anchor="middle" font-size="8.5" fill="#2a4a2a">Workload</text>
+      <line x1="175" y1="145" x2="195" y2="118" stroke="#6aab8a" stroke-width="1.5"/>
+      <text x="168" y="142" text-anchor="middle" font-size="8.5" fill="#2a4a2a">Experience</text>
+
+      <!-- Method -->
+      <line x1="310" y1="180" x2="350" y2="100" stroke="#1a3a2a" stroke-width="2"/>
+      <rect x="258" y="60" width="90" height="36" rx="4" fill="#e8f5ee" stroke="#1a3a2a" stroke-width="1.5"/>
+      <text x="303" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#1a3a2a">Method</text>
+      <text x="303" y="89" text-anchor="middle" font-size="9" fill="#2a4a2a">Process · Steps</text>
+      <line x1="305" y1="133" x2="325" y2="100" stroke="#6aab8a" stroke-width="1.5"/>
+      <text x="298" y="130" text-anchor="middle" font-size="8.5" fill="#2a4a2a">Procedure</text>
+      <line x1="325" y1="145" x2="345" y2="118" stroke="#6aab8a" stroke-width="1.5"/>
+      <text x="318" y="142" text-anchor="middle" font-size="8.5" fill="#2a4a2a">Checklist</text>
+
+      <!-- Machine -->
+      <line x1="460" y1="180" x2="500" y2="100" stroke="#1a3a2a" stroke-width="2"/>
+      <rect x="408" y="60" width="90" height="36" rx="4" fill="#e8f5ee" stroke="#1a3a2a" stroke-width="1.5"/>
+      <text x="453" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#1a3a2a">Machine</text>
+      <text x="453" y="89" text-anchor="middle" font-size="9" fill="#2a4a2a">Tools · Tech</text>
+      <line x1="455" y1="133" x2="475" y2="100" stroke="#6aab8a" stroke-width="1.5"/>
+      <text x="448" y="130" text-anchor="middle" font-size="8.5" fill="#2a4a2a">Maintenance</text>
+      <line x1="475" y1="145" x2="495" y2="118" stroke="#6aab8a" stroke-width="1.5"/>
+      <text x="468" y="142" text-anchor="middle" font-size="8.5" fill="#2a4a2a">Capacity</text>
+
+      <!-- BOTTOM BONES -->
+      <!-- Material -->
+      <line x1="200" y1="180" x2="160" y2="260" stroke="#1a3a2a" stroke-width="2"/>
+      <rect x="108" y="265" width="90" height="36" rx="4" fill="#fdf3e3" stroke="#6b3d0e" stroke-width="1.5"/>
+      <text x="153" y="281" text-anchor="middle" font-size="11" font-weight="700" fill="#6b3d0e">Material</text>
+      <text x="153" y="294" text-anchor="middle" font-size="9" fill="#5a3d10">Inputs · Data</text>
+      <line x1="175" y1="215" x2="155" y2="248" stroke="#c8a878" stroke-width="1.5"/>
+      <text x="168" y="212" text-anchor="middle" font-size="8.5" fill="#5a3d10">Quality</text>
+      <line x1="195" y1="227" x2="175" y2="260" stroke="#c8a878" stroke-width="1.5"/>
+      <text x="192" y="224" text-anchor="middle" font-size="8.5" fill="#5a3d10">Supply</text>
+
+      <!-- Measurement -->
+      <line x1="350" y1="180" x2="310" y2="260" stroke="#1a3a2a" stroke-width="2"/>
+      <rect x="258" y="265" width="104" height="36" rx="4" fill="#fdf3e3" stroke="#6b3d0e" stroke-width="1.5"/>
+      <text x="310" y="281" text-anchor="middle" font-size="11" font-weight="700" fill="#6b3d0e">Measurement</text>
+      <text x="310" y="294" text-anchor="middle" font-size="9" fill="#5a3d10">Metrics · KPIs</text>
+      <line x1="325" y1="215" x2="305" y2="248" stroke="#c8a878" stroke-width="1.5"/>
+      <text x="325" y="212" text-anchor="middle" font-size="8.5" fill="#5a3d10">Accuracy</text>
+      <line x1="345" y1="227" x2="325" y2="260" stroke="#c8a878" stroke-width="1.5"/>
+      <text x="345" y="224" text-anchor="middle" font-size="8.5" fill="#5a3d10">Frequency</text>
+
+      <!-- Environment -->
+      <line x1="500" y1="180" x2="460" y2="260" stroke="#1a3a2a" stroke-width="2"/>
+      <rect x="408" y="265" width="100" height="36" rx="4" fill="#fdf3e3" stroke="#6b3d0e" stroke-width="1.5"/>
+      <text x="458" y="281" text-anchor="middle" font-size="11" font-weight="700" fill="#6b3d0e">Environment</text>
+      <text x="458" y="294" text-anchor="middle" font-size="9" fill="#5a3d10">Culture · Context</text>
+      <line x1="475" y1="215" x2="455" y2="248" stroke="#c8a878" stroke-width="1.5"/>
+      <text x="478" y="212" text-anchor="middle" font-size="8.5" fill="#5a3d10">Pressure</text>
+      <line x1="495" y1="227" x2="475" y2="260" stroke="#c8a878" stroke-width="1.5"/>
+      <text x="498" y="224" text-anchor="middle" font-size="8.5" fill="#5a3d10">Constraints</text>
+
+      <!-- Labels -->
+      <text x="30" y="175" text-anchor="middle" font-size="9" font-weight="600" fill="#777" letter-spacing="1" transform="rotate(-90, 30, 175)">CAUSES</text>
+      <text x="715" y="230" text-anchor="middle" font-size="9" font-weight="600" fill="#777" letter-spacing="1">EFFECT</text>
+    </svg>
+  </div>
+  <div style="margin-top:8px;padding:14px 18px;background:var(--forest-l);border-radius:4px;border-left:3px solid var(--forest)">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--forest);margin-bottom:4px;">Session tip</div>
+    <div style="font-size:0.82rem;color:#2a4a2a;font-weight:300;line-height:1.5">Map everything before you prioritise anything. Dot-vote the most likely causes after all branches are populated — this prevents premature convergence on the obvious answer.</div>
+  </div>
+</div>
+
+<!-- AAR -->
+<div class="panel" id="aar">
+  <div class="panel-header"><h1>After Action Review</h1><p>US Army, 1970s · Run within 48 hours. Be honest. Write it down. Act on it.</p></div>
+  <div class="aar-steps">
+    <div class="aar-step" style="background:var(--forest);color:white;animation-delay:0s">
+      <div class="aar-num" style="color:white">1</div>
+      <div class="aar-question">What was supposed to happen?</div>
+      <div class="aar-desc" style="color:rgba(255,255,255,0.8)">The intent, the plan, the expected outcome. Be specific about what success looked like — and what metrics or milestones you were working toward.</div>
+    </div>
+    <div class="aar-step" style="background:var(--amber-l);border:1.5px solid #d9c09a;animation-delay:0.1s">
+      <div class="aar-num" style="color:var(--amber)">2</div>
+      <div class="aar-question" style="color:var(--amber)">What actually happened?</div>
+      <div class="aar-desc" style="color:#5a3d10">The reality — not the sanitised version. Stick to observable facts and events. This is the hardest step. Teams that skip the honesty here get nothing from the rest.</div>
+    </div>
+    <div class="aar-step" style="background:var(--rust-l);border:1.5px solid #d4a090;animation-delay:0.2s">
+      <div class="aar-num" style="color:var(--rust)">3</div>
+      <div class="aar-question" style="color:var(--rust)">Why was there a difference?</div>
+      <div class="aar-desc" style="color:#4a1a08">The gap between intent and reality — this is where the learning lives. Use the 5 Whys here if the cause isn't immediately clear. Don't accept 'communication issues' as an answer.</div>
+    </div>
+    <div class="aar-step" style="background:var(--sage-l);border:1.5px solid #a8c090;animation-delay:0.3s">
+      <div class="aar-num" style="color:var(--sage)">4</div>
+      <div class="aar-question" style="color:var(--sage)">What will we do differently?</div>
+      <div class="aar-desc" style="color:#2a3a1a">The concrete changes that follow. Assign each to a named person with a deadline. An AAR that produces no action is just a conversation. Write it up and share it within 24 hours.</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;padding:12px 16px;background:var(--forest-l);border-radius:4px;border-left:3px solid var(--forest)"><div style="font-size:0.65rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--forest);margin-bottom:4px;">Run it</div><div style="font-size:0.8rem;color:#2a4a2a;font-weight:300;line-height:1.45">Within 48 hours of the event. With the people who did the work. 30–60 minutes maximum.</div></div>
+    <div style="flex:1;min-width:200px;padding:12px 16px;background:var(--rust-l);border-radius:4px;border-left:3px solid var(--rust)"><div style="font-size:0.65rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--rust);margin-bottom:4px;">Set the tone</div><div style="font-size:0.8rem;color:#4a1a08;font-weight:300;line-height:1.45">"This is about learning, not blame." Say it at the start. Mean it. Enforce it if you need to.</div></div>
+  </div>
+</div>
+
+<!-- CYNEFIN -->
+<div class="panel" id="cynefin">
+  <div class="panel-header"><h1>The Cynefin Framework</h1><p>Dave Snowden, 1999 · Know what kind of problem you're facing before you try to solve it</p></div>
+  <div class="cynefin-grid">
+    <div class="c-domain" style="background:var(--forest);color:white;animation-delay:0s">
+      <div><div class="c-domain-label">Complex</div><div class="c-domain-title">Complex</div><div class="c-domain-approach">Probe → Sense → Respond</div><div class="c-domain-desc" style="color:rgba(255,255,255,0.8)">No right answer exists. Cause and effect only visible in retrospect. Experiment, learn, adapt. Most leadership and culture challenges live here.</div></div>
+    </div>
+    <div class="c-domain" style="background:var(--teal-l);border:1.5px solid #90c8c8;animation-delay:0.1s">
+      <div><div class="c-domain-label" style="color:var(--teal)">Complicated</div><div class="c-domain-title" style="color:var(--teal)">Complicated</div><div class="c-domain-approach" style="color:var(--teal)">Sense → Analyse → Respond</div><div class="c-domain-desc" style="color:#0d3030">Right answers exist — but require expertise to find. Call in specialists. Do the analysis. Good practice applies, not just best practice.</div></div>
+    </div>
+    <div class="c-chaos" style="background:#1a1a1a">
+      <div><div class="c-domain-label" style="color:#aaa;font-size:0.55rem">The Centre</div><div class="c-domain-title" style="color:white;font-size:0.95rem">Confused / Chaotic</div></div>
+      <div style="flex:1"><div class="c-domain-approach" style="color:#aaa;font-size:0.65rem">Chaotic: Act → Sense → Respond</div><div class="c-domain-desc" style="color:#ccc;font-size:0.75rem">No discernible cause and effect. Stop analysing. Act immediately to stabilise, then move to sense-making. In the centre: figure out which domain you're actually in first.</div></div>
+    </div>
+    <div class="c-domain" style="background:var(--plum-l);border:1.5px solid #c9a0be;animation-delay:0.2s">
+      <div><div class="c-domain-label" style="color:var(--plum)">Chaotic →</div><div class="c-domain-title" style="color:var(--plum)">Clear</div><div class="c-domain-approach" style="color:var(--plum)">Sense → Categorise → Respond</div><div class="c-domain-desc" style="color:#3d1030">Cause and effect are obvious to everyone. Best practice exists and should be followed. Don't over-engineer it — but don't get complacent either.</div></div>
+    </div>
+    <div class="c-domain" style="background:var(--amber-l);border:1.5px solid #d9c09a;animation-delay:0.3s">
+      <div><div class="c-domain-label" style="color:var(--amber)">↑ Complex</div><div class="c-domain-title" style="color:var(--amber)">Watch: Complex → Chaotic</div><div class="c-domain-approach" style="color:var(--amber)">The cliff edge</div><div class="c-domain-desc" style="color:#5a3d10">Complacency in a Complex domain can tip suddenly into Chaos. The most dangerous transition — and one most organisations miss until it's too late.</div></div>
+    </div>
+  </div>
+  <div style="margin-top:16px;padding:14px 18px;background:var(--forest-l);border-radius:4px;border-left:3px solid var(--forest)">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--forest);margin-bottom:4px;">The most common mistake</div>
+    <div style="font-size:0.82rem;color:#2a4a2a;font-weight:300;line-height:1.5">Applying Complicated-domain thinking (analyse → best practice) to Complex-domain problems (culture, innovation, strategy). Analysis doesn't solve emergence — experimentation does.</div>
+  </div>
+</div>
+
+<!-- RACI -->
+<div class="panel" id="raci">
+  <div class="panel-header"><h1>RACI Matrix</h1><p>Responsibility assignment · Every task needs exactly one Accountable person. Not two. One.</p></div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;">
+    <div style="padding:16px;background:var(--forest);border-radius:4px;color:white"><div style="font-size:1.4rem;font-weight:700;font-family:'Playfair Display',serif;margin-bottom:4px">R — Responsible</div><div style="font-size:0.82rem;opacity:0.85;font-weight:300;line-height:1.5">Does the work. Can be more than one person. Accountable person delegates to them.</div></div>
+    <div style="padding:16px;background:var(--forest-l);border:1.5px solid #90c8a0;border-radius:4px"><div style="font-size:1.4rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--forest);margin-bottom:4px">A — Accountable</div><div style="font-size:0.82rem;color:#2a4a2a;font-weight:300;line-height:1.5">Ultimately answerable. Signs off. There must be exactly <strong>one</strong> per task. If there are two, there are none.</div></div>
+    <div style="padding:16px;background:var(--amber-l);border:1.5px solid #d9c09a;border-radius:4px"><div style="font-size:1.4rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--amber);margin-bottom:4px">C — Consulted</div><div style="font-size:0.82rem;color:#5a3d10;font-weight:300;line-height:1.5">Input sought before decisions. Two-way communication. Limit this — too many C's creates a bottleneck.</div></div>
+    <div style="padding:16px;background:var(--navy-l);border:1.5px solid #b0b5d0;border-radius:4px"><div style="font-size:1.4rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:4px">I — Informed</div><div style="font-size:0.82rem;color:#1a2060;font-weight:300;line-height:1.5">Kept up to date after decisions are made. One-way communication. They don't need to be asked — just told.</div></div>
+  </div>
+  <div class="raci-table-wrap">
+    <table class="raci-table">
+      <thead><tr><th>Task / Decision</th><th>Team Lead</th><th>Designer</th><th>Developer</th><th>Stakeholder</th><th>QA</th></tr></thead>
+      <tbody>
+        <tr><td>Define project scope</td><td><span class="raci-badge raci-A">A</span></td><td><span class="raci-badge raci-C">C</span></td><td><span class="raci-badge raci-C">C</span></td><td><span class="raci-badge raci-C">C</span></td><td><span class="raci-badge raci-I">I</span></td></tr>
+        <tr><td>Design wireframes</td><td><span class="raci-badge raci-A">A</span></td><td><span class="raci-badge raci-R">R</span></td><td><span class="raci-badge raci-C">C</span></td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-I">I</span></td></tr>
+        <tr><td>Build feature</td><td><span class="raci-badge raci-A">A</span></td><td><span class="raci-badge raci-C">C</span></td><td><span class="raci-badge raci-R">R</span></td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-I">I</span></td></tr>
+        <tr><td>Test & QA sign-off</td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-R">R</span></td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-A">A</span></td></tr>
+        <tr><td>Stakeholder approval</td><td><span class="raci-badge raci-R">R</span></td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-I">I</span></td><td><span class="raci-badge raci-A">A</span></td><td><span class="raci-badge raci-I">I</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="raci-legend">
+    <div class="raci-legend-item"><span class="raci-badge raci-R">R</span> Responsible — does the work</div>
+    <div class="raci-legend-item"><span class="raci-badge raci-A">A</span> Accountable — one person only</div>
+    <div class="raci-legend-item"><span class="raci-badge raci-C">C</span> Consulted — asked before deciding</div>
+    <div class="raci-legend-item"><span class="raci-badge raci-I">I</span> Informed — told after deciding</div>
+  </div>
+</div>
+
+<!-- PRE-MORTEM -->
+<div class="panel" id="premortem">
+  <div class="panel-header"><h1>Pre-mortem Analysis</h1><p>Gary Klein · Imagine the project has already failed — then work backwards</p></div>
+  <div class="pm-flow">
+    <div class="pm-step" style="background:var(--forest);color:white;animation-delay:0s">
+      <div class="pm-num" style="background:rgba(255,255,255,0.15);color:white">1</div>
+      <div class="pm-body"><div class="pm-title">Set the scene</div><div class="pm-desc" style="color:rgba(255,255,255,0.82)">"It is twelve months from today. This project has failed — completely and embarrassingly. We're in a post-mortem. Something went badly wrong." Say this clearly, then pause. Let it land.</div></div>
+    </div>
+    <div class="pm-arrow">↓</div>
+    <div class="pm-step" style="background:var(--sage-l);border:1.5px solid #a8c090;animation-delay:0.1s">
+      <div class="pm-num" style="background:var(--sage-l);color:var(--sage);border:2px solid var(--sage)">2</div>
+      <div class="pm-body"><div class="pm-title" style="color:var(--sage)">Write silently (2–3 mins)</div><div class="pm-desc" style="color:#2a3a1a">Everyone writes down every reason why the project failed — individually and silently. This is the critical step. Silent writing prevents anchoring to the first idea raised and ensures quiet voices get captured.</div></div>
+    </div>
+    <div class="pm-arrow">↓</div>
+    <div class="pm-step" style="background:var(--amber-l);border:1.5px solid #d9c09a;animation-delay:0.2s">
+      <div class="pm-num" style="background:var(--amber-l);color:var(--amber);border:2px solid var(--amber)">3</div>
+      <div class="pm-body"><div class="pm-title" style="color:var(--amber)">Collect one reason each (round-robin)</div><div class="pm-desc" style="color:#5a3d10">Go around the room. Each person shares one failure reason. Rotate until all reasons are captured. Duplicates are useful — frequency signals priority. Push for specificity: "scope creep" is not specific enough.</div></div>
+    </div>
+    <div class="pm-arrow">↓</div>
+    <div class="pm-step" style="background:var(--plum-l);border:1.5px solid #c9a0be;animation-delay:0.3s">
+      <div class="pm-num" style="background:var(--plum-l);color:var(--plum);border:2px solid var(--plum)">4</div>
+      <div class="pm-body"><div class="pm-title" style="color:var(--plum)">Prioritise and assign mitigations</div><div class="pm-desc" style="color:#3d1030">Rank by likelihood × impact. Take the top five failure modes and assign a named owner to each mitigation. Build these into the project plan before you leave the room. Research shows pre-mortems improve foresight accuracy by ~30%.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NVC -->
+<div class="panel" id="nvc">
+  <div class="panel-header"><h1>Nonviolent Communication</h1><p>Marshall Rosenberg · Say what you need without triggering a defence response</p></div>
+  <div class="nvc-flow">
+    <div class="nvc-step" style="background:var(--forest);color:white;animation-delay:0s">
+      <div class="nvc-letter" style="color:white">O</div>
+      <div class="nvc-label">Step 1</div>
+      <div class="nvc-title">Observation</div>
+      <div class="nvc-desc" style="color:rgba(255,255,255,0.82)">Describe what you see or hear — factually, without evaluation. Separate the data from your interpretation of it.</div>
+      <div class="nvc-example" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7)"><strong>Not:</strong> "You're always late."<br><strong>But:</strong> "You've arrived after the start time in our last three one-to-ones."</div>
+    </div>
+    <div class="nvc-step" style="background:var(--teal-l);border:1.5px solid #90c8c8;animation-delay:0.1s">
+      <div class="nvc-letter" style="color:var(--teal)">F</div>
+      <div class="nvc-label" style="color:var(--teal)">Step 2</div>
+      <div class="nvc-title" style="color:var(--teal)">Feeling</div>
+      <div class="nvc-desc" style="color:#0d3030">Express how you feel — using feeling words, not thoughts disguised as feelings.</div>
+      <div class="nvc-example" style="border-color:var(--teal);color:#0d4040"><strong>Not:</strong> "I feel like you don't respect my time."<br><strong>But:</strong> "I feel frustrated and undervalued."</div>
+    </div>
+    <div class="nvc-step" style="background:var(--amber-l);border:1.5px solid #d9c09a;animation-delay:0.2s">
+      <div class="nvc-letter" style="color:var(--amber)">N</div>
+      <div class="nvc-label" style="color:var(--amber)">Step 3</div>
+      <div class="nvc-title" style="color:var(--amber)">Need</div>
+      <div class="nvc-desc" style="color:#5a3d10">Identify the underlying need that isn't being met. Needs are universal — reliability, respect, clarity, autonomy. Not about what the other person should do.</div>
+      <div class="nvc-example" style="border-color:var(--amber);color:#5a3d10">"...because I need our time together to feel reliable and respected."</div>
+    </div>
+    <div class="nvc-step" style="background:var(--sage-l);border:1.5px solid #a8c090;animation-delay:0.3s">
+      <div class="nvc-letter" style="color:var(--sage)">R</div>
+      <div class="nvc-label" style="color:var(--sage)">Step 4</div>
+      <div class="nvc-title" style="color:var(--sage)">Request</div>
+      <div class="nvc-desc" style="color:#2a3a1a">Make a specific, actionable request — not a demand. A request leaves room for the other person to respond. Demands close conversations; requests open them.</div>
+      <div class="nvc-example" style="border-color:var(--sage);color:#2a3a1a">"Would you be willing to arrive five minutes early to our next session?"</div>
+    </div>
+  </div>
+  <div style="margin-top:12px;padding:14px 18px;background:var(--forest-l);border-radius:4px;border-left:3px solid var(--forest)">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--forest);margin-bottom:4px;">Pair with Radical Candour</div>
+    <div style="font-size:0.82rem;color:#2a4a2a;font-weight:300;line-height:1.5">RC tells you <em>what</em> to say — be direct, be honest, care about the person. NVC tells you <em>how</em> to structure it so it lands without triggering a defensive shutdown.</div>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const labels = ['intro','rc','johari','swot','hats','whys','pac','fishbone','aar','cynefin','raci','premortem','nvc'];
+  btns[labels.indexOf(id)].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
