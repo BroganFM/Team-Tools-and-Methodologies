@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Case Management Flow — Malta</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f5f4f0;
+    padding: 32px 20px 60px;
+    min-height: 100vh;
+    color: #1a1a1a;
+  }
+  h1 { text-align: center; font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 12px; color: #999; margin-bottom: 4px; }
+  .law-tag {
+    text-align: center; font-size: 11px; color: #712B13;
+    background: #fce8e0; border: 1px solid #F0997B;
+    border-radius: 999px; padding: 3px 14px;
+    display: inline-block; margin: 0 auto 24px;
+  }
+  .law-tag-wrap { text-align: center; margin-bottom: 24px; }
+  .click-hint { text-align: center; font-size: 11px; color: #aaa; margin-bottom: 28px; font-style: italic; }
+  .shared { display: flex; flex-direction: column; align-items: center; max-width: 860px; margin: 0 auto; }
+  .card {
+    border-radius: 8px; padding: 10px 14px; text-align: center;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    width: 100%; user-select: none;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .card .title { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .card .sub { font-size: 11px; font-weight: 400; margin-top: 3px; line-height: 1.4; opacity: 0.8; }
+  .card .more { font-size: 10px; margin-top: 5px; opacity: 0.55; letter-spacing: 0.3px; }
+  .plain { border-radius: 8px; padding: 10px 14px; text-align: center; width: 100%; }
+  .plain .title { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .plain .sub { font-size: 11px; font-weight: 400; margin-top: 3px; line-height: 1.4; opacity: 0.8; }
+  .pill { border-radius: 999px; }
+  .gray   { background: #e8e6e0; color: #2c2c2a; border: 1px solid #ccc9c0; }
+  .teal   { background: #d4f0e4; color: #085041; border: 1px solid #9FE1CB; }
+  .purple { background: #e4e2fc; color: #26215C; border: 1px solid #AFA9EC; }
+  .blue   { background: #daeaf8; color: #042C53; border: 1px solid #85B7EB; }
+  .coral  { background: #fce8e0; color: #4A1B0C; border: 1px solid #F0997B; }
+  .red    { background: #fce8e8; color: #501313; border: 1px dashed #F09595; }
+  .amber  { background: #fff3cd; color: #5a3e00; border: 1px solid #ffc107; }
+  .green-pill {
+    font-size: 10px; font-weight: 600; color: #085041;
+    background: #d4f0e4; border: 1px solid #9FE1CB;
+    border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+  }
+  .vline { width: 2px; background: #bbb; margin: 0 auto; position: relative; }
+  .vline.arrow::after {
+    content: ''; position: absolute; bottom: -6px; left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent; border-right: 5px solid transparent;
+    border-top: 7px solid #bbb;
+  }
+  .vlabel { font-size: 11px; color: #888; text-align: center; }
+  .exit-row { display: flex; align-items: center; width: 100%; gap: 0; }
+  .exit-row .decision { flex: 1; min-width: 0; }
+  .exit-side { display: flex; align-items: center; gap: 5px; flex-shrink: 0; padding-left: 6px; }
+  .harrow { width: 22px; height: 2px; background: #1D9E75; position: relative; flex-shrink: 0; }
+  .harrow::after {
+    content: ''; position: absolute; right: -6px; top: 50%;
+    transform: translateY(-50%);
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+    border-left: 7px solid #1D9E75;
+  }
+  .exit-label { font-size: 10px; color: #888; white-space: nowrap; }
+  .track-header {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 6px 18px; border-radius: 999px;
+  }
+  .track-header.cap { background: #daeaf8; color: #0C447C; border: 1px solid #85B7EB; }
+  .track-header.con { background: #fce8e0; color: #712B13; border: 1px solid #F0997B; }
+  .two-tracks { display: flex; width: 100%; max-width: 860px; margin: 0 auto; align-items: flex-start; }
+  .track { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 14px; }
+  .track.left { border-right: 1px solid #ddd; }
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 1000;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; max-width: 500px;
+    width: 100%; max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    animation: modalIn 0.18s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-header {
+    padding: 16px 20px 12px; border-bottom: 1px solid #eee;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .modal-header h2 { font-size: 15px; font-weight: 600; color: #1a1a1a; line-height: 1.3; }
+  .modal-tag {
+    font-size: 10px; font-weight: 600; border-radius: 4px;
+    padding: 3px 8px; white-space: nowrap; flex-shrink: 0;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .close-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #999; flex-shrink: 0; padding: 0 0 0 8px; line-height: 1; }
+  .close-btn:hover { color: #333; }
+  .modal-body { padding: 16px 20px; }
+  .modal-section { margin-bottom: 16px; }
+  .modal-section:last-child { margin-bottom: 0; }
+  .modal-section h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 8px; }
+  .modal-section p { font-size: 13px; color: #333; line-height: 1.6; }
+  .modal-section ul { list-style: none; padding: 0; }
+  .modal-section ul li { font-size: 13px; color: #333; line-height: 1.6; padding: 3px 0 3px 16px; position: relative; }
+  .modal-section ul li::before { content: '→'; position: absolute; left: 0; color: #aaa; font-size: 11px; top: 5px; }
+  .modal-links { display: flex; flex-direction: column; gap: 8px; }
+  .modal-link {
+    display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+    background: #f5f4f0; border-radius: 6px; text-decoration: none;
+    color: #1a1a1a; font-size: 12px; font-weight: 500;
+    border: 1px solid #e0ddd6; transition: background 0.12s;
+  }
+  .modal-link:hover { background: #eceae3; }
+  .modal-link .link-meta { font-size: 10px; color: #999; font-weight: 400; margin-top: 1px; }
+  .warning-box { background: #fff8e6; border: 1px solid #f5c842; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #7a5c00; line-height: 1.5; }
+  .diff-box { background: #fff0e6; border: 1px solid #f0997b; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #4A1B0C; line-height: 1.5; }
+  .legend { max-width: 860px; margin: 32px auto 0; display: flex; flex-wrap: wrap; gap: 8px 20px; background: white; border: 1px solid #e0ddd6; border-radius: 8px; padding: 14px 18px; }
+  .legend-title { width: 100%; font-size: 11px; font-weight: 600; color: #888; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #555; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<h1>HR Case Management Flow — Malta</h1>
+<p class="subtitle">Reforged Studios — People &amp; Culture</p>
+<div class="law-tag-wrap"><span class="law-tag">Employment &amp; Industrial Relations Act (EIRA) — Chapter 452, Laws of Malta</span></div>
+<p class="click-hint">Click any coloured card for detail and legal guidance</p>
+
+<!-- SHARED TOP -->
+<div class="shared">
+
+  <div class="plain pill gray" style="max-width:220px;">
+    <div class="title">Concern identified</div>
+  </div>
+
+  <div class="vline arrow" style="height:18px;"></div>
+
+  <div class="card teal" style="max-width:360px;" onclick="openModal('informal')">
+    <div class="title">Informal management</div>
+    <div class="sub">Conversation, clarify expectations, agree support</div>
+    <div class="more">Click for detail ↓</div>
+  </div>
+
+  <div class="vline arrow" style="height:18px;"></div>
+
+  <div class="exit-row" style="max-width:480px; margin:0 auto;">
+    <div class="decision plain gray" style="max-width:none;">
+      <div class="title">Resolved informally?</div>
+    </div>
+    <div class="exit-side">
+      <div class="harrow"></div>
+      <span class="exit-label">Yes</span>
+      <div class="green-pill">Complete ✓</div>
+    </div>
+  </div>
+
+  <div class="vlabel">No</div>
+  <div class="vline arrow" style="height:14px;"></div>
+
+  <div class="card amber" style="max-width:360px;" onclick="openModal('verbal')">
+    <div class="title">Verbal warning</div>
+    <div class="sub">Formal verbal warning — documented in writing</div>
+    <div class="more">Click for detail ↓</div>
+  </div>
+
+  <div class="vline arrow" style="height:18px;"></div>
+
+  <div class="exit-row" style="max-width:480px; margin:0 auto;">
+    <div class="decision plain gray" style="max-width:none;">
+      <div class="title">Resolved?</div>
+    </div>
+    <div class="exit-side">
+      <div class="harrow"></div>
+      <span class="exit-label">Yes</span>
+      <div class="green-pill">Complete ✓</div>
+    </div>
+  </div>
+
+  <div class="vlabel">No</div>
+  <div class="vline arrow" style="height:14px;"></div>
+
+  <div class="card purple" style="max-width:360px;" onclick="openModal('investigation')">
+    <div class="title">Investigation</div>
+    <div class="sub">Fact-finding — charge letter issued to employee</div>
+    <div class="more">Click for detail ↓</div>
+  </div>
+
+  <div class="vline arrow" style="height:18px;"></div>
+
+  <div class="plain gray" style="max-width:360px;">
+    <div class="title">Capability or conduct?</div>
+    <div class="sub">Can they not meet the standard, or are they choosing not to?</div>
+  </div>
+
+  <div style="height:20px; display:flex; align-items:flex-end; width:100%; max-width:820px; justify-content:center;">
+    <div style="flex:1; height:2px; background:#bbb;"></div>
+    <div style="width:2px; height:20px; background:#bbb;"></div>
+    <div style="flex:1; height:2px; background:#bbb;"></div>
+  </div>
+
+  <div style="display:flex; width:100%; max-width:820px; justify-content:space-around;">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <div style="width:2px; height:12px; background:#bbb;"></div>
+      <div class="track-header cap">Capability track</div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <div style="width:2px; height:12px; background:#bbb;"></div>
+      <div class="track-header con">Conduct track</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TWO TRACKS -->
+<div class="two-tracks">
+
+  <!-- CAPABILITY -->
+  <div class="track left">
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="card blue" onclick="openModal('cap-meeting')">
+      <div class="title">Formal capability meeting</div>
+      <div class="sub">Written invite, right to representation. PIP agreed.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="card blue" onclick="openModal('cap-reviews')">
+      <div class="title">Regular review meetings</div>
+      <div class="sub">Documented throughout the PIP period</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Sufficient progress?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">Yes</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">No</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card blue" onclick="openModal('cap-first')">
+      <div class="title">First written warning</div>
+      <div class="sub">Documented. PIP extended or reset.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="card blue" onclick="openModal('cap-reviews')">
+      <div class="title">Further review period</div>
+      <div class="sub">Continue monitoring and documenting</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Sufficient progress?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">Yes</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">No</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card blue" onclick="openModal('cap-second')">
+      <div class="title">Second written warning</div>
+      <div class="sub">Active. Employee clearly warned.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Sufficient progress?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">Yes</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">No</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card blue" onclick="openModal('cap-final')">
+      <div class="title">Final written warning</div>
+      <div class="sub">Dismissal is next step if no improvement.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Sufficient progress?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">Yes</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">No</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card coral" onclick="openModal('cap-dismissal')">
+      <div class="title">Dismissal — good and sufficient cause</div>
+      <div class="sub">Formal hearing, notice required</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="card gray" onclick="openModal('appeal')">
+      <div class="title">Right of appeal</div>
+      <div class="sub">Industrial Tribunal if not resolved internally</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+  </div>
+
+  <!-- CONDUCT -->
+  <div class="track">
+
+    <div class="vline" style="height:14px;"></div>
+
+    <div class="card red" onclick="openModal('gross')">
+      <div class="title">⚡ Serious misconduct?</div>
+      <div class="sub">May justify immediate dismissal — enter here</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="card coral" onclick="openModal('hearing')">
+      <div class="title">Disciplinary hearing</div>
+      <div class="sub">Charge letter issued, right to representation</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;">
+        <div class="title">Outcome decision</div>
+        <div class="sub" style="font-size:10px;">Adjourn before deciding</div>
+      </div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">No action</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+
+    <div class="vlabel">Warning issued ↓</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card coral" onclick="openModal('con-first')">
+      <div class="title">First written warning</div>
+      <div class="sub">Documented. Right of appeal applies.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Further issues?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">No</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">Yes</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card coral" onclick="openModal('con-second')">
+      <div class="title">Second written warning</div>
+      <div class="sub">Documented. Right of appeal applies.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Further issues?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">No</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">Yes</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card coral" onclick="openModal('con-final')">
+      <div class="title">Final written warning</div>
+      <div class="sub">Dismissal is next step if further issues arise.</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="exit-row">
+      <div class="decision plain gray" style="max-width:none;"><div class="title">Further issues?</div></div>
+      <div class="exit-side">
+        <div class="harrow"></div>
+        <span class="exit-label">No</span>
+        <div class="green-pill">Complete ✓</div>
+      </div>
+    </div>
+    <div class="vlabel">Yes</div>
+    <div class="vline arrow" style="height:10px;"></div>
+
+    <div class="card coral" onclick="openModal('con-dismissal')">
+      <div class="title">Dismissal — good and sufficient cause</div>
+      <div class="sub">Formal hearing, notice required</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+    <div class="vline arrow" style="height:14px;"></div>
+
+    <div class="card gray" onclick="openModal('appeal')">
+      <div class="title">Right of appeal</div>
+      <div class="sub">Industrial Tribunal if not resolved internally</div>
+      <div class="more">Click for detail ↓</div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Key</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4f0e4;border:1px solid #9FE1CB;"></div> Informal</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fff3cd;border:1px solid #ffc107;"></div> Verbal warning (Malta-specific)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e4e2fc;border:1px solid #AFA9EC;"></div> Investigation</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#daeaf8;border:1px solid #85B7EB;"></div> Capability track</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fce8e0;border:1px solid #F0997B;"></div> Conduct track</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fce8e8;border:1px dashed #F09595;"></div> Serious misconduct</div>
+</div>
+
+<p style="text-align:center;font-size:10px;color:#bbb;margin-top:20px;">Reforged Studios — People &amp; Culture &nbsp;·&nbsp; EIRA Chapter 452, Laws of Malta &nbsp;·&nbsp; Industrial Tribunal jurisdiction</p>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <div>
+        <div class="modal-tag" id="modalTag"></div>
+        <h2 id="modalTitle" style="margin-top:6px;"></h2>
+      </div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const modals = {
+
+  informal: {
+    tag: 'Informal', tagColor: '#085041', tagBg: '#d4f0e4',
+    title: 'Informal management',
+    sections: [
+      { heading: 'What this stage is', text: 'The first response to a concern — no formal record, no disciplinary implications. The goal is early resolution before the formal process becomes necessary.' },
+      { heading: 'What to do', list: [
+        'Have a private, confidential conversation',
+        'Be specific about the concern with examples',
+        'Clarify what the expected standard looks like',
+        'Agree what support or changes are needed',
+        'Keep informal notes for your own reference',
+        'Set a timeframe to review progress'
+      ]},
+      { heading: 'Malta context', diff: 'Under EIRA and Industrial Tribunal case law, Maltese courts look carefully at whether the employer gave the employee a fair opportunity to improve before escalating. A documented informal stage strengthens your position significantly.' },
+      { heading: 'Legal reference', links: [
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' }
+      ]}
+    ]
+  },
+
+  verbal: {
+    tag: 'Malta-Specific', tagColor: '#5a3e00', tagBg: '#fff3cd',
+    title: 'Verbal warning',
+    sections: [
+      { heading: 'Why this stage exists in Malta', text: 'Unlike the UK, Maltese employment law and Industrial Tribunal case law place significant weight on verbal warnings as a formal step. A verbal warning should be documented in writing even though it is delivered verbally — this creates the paper trail you need.' },
+      { heading: 'What to do', list: [
+        'Deliver the warning verbally in a formal meeting',
+        'Confirm it in writing to the employee immediately afterwards',
+        'State clearly what the concern is and what must change',
+        'Set a review period',
+        'Keep a signed copy on file if possible'
+      ]},
+      { heading: 'Important', warning: 'The Industrial Tribunal has found dismissals unfair where employers went straight to written warnings or dismissal without first issuing a verbal warning. Case law suggests a verbal warning followed by up to three written warnings before dismissal is considered prudent.' },
+      { heading: 'Legal reference', links: [
+        { label: 'BDO Malta — Termination and warnings guidance', meta: 'bdo.com.mt', url: 'https://www.bdo.com.mt/en-gb/insights/termination-of-employment' },
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' }
+      ]}
+    ]
+  },
+
+  investigation: {
+    tag: 'Shared', tagColor: '#26215C', tagBg: '#e4e2fc',
+    title: 'Investigation and charge letter',
+    sections: [
+      { heading: 'Purpose', text: 'Fact-finding only. Determines whether a formal hearing is warranted and whether the issue is capability or conduct.' },
+      { heading: 'The charge letter — Malta requirement', warning: 'Under Maltese law and confirmed by Industrial Tribunal case law, the employee must receive a written charge letter detailing the specific allegations before any disciplinary hearing takes place. Failure to issue a charge letter is a procedural breach that can render a dismissal unfair. The employee must have enough detail to prepare their defence.' },
+      { heading: 'What the charge letter must include', list: [
+        'The specific allegation or concern in detail',
+        'The date(s) and circumstances',
+        'The possible outcome including dismissal if applicable',
+        'The date, time and location of the hearing',
+        'Confirmation of the right to be accompanied or represented'
+      ]},
+      { heading: 'Investigation principles', list: [
+        'Gather evidence from all relevant parties',
+        'Keep findings confidential',
+        'Do not predetermine the outcome',
+        'Complete promptly — delay weakens your position'
+      ]},
+      { heading: 'Legal reference', links: [
+        { label: 'AE Legal — Disciplinary process and charge letters', meta: 'aelegal.com.mt', url: 'https://aelegal.com.mt/why-is-a-disciplinary-process-important-for-dismissals' },
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' }
+      ]}
+    ]
+  },
+
+  'cap-meeting': {
+    tag: 'Capability', tagColor: '#042C53', tagBg: '#daeaf8',
+    title: 'Formal capability meeting',
+    sections: [
+      { heading: 'Purpose', text: 'To formally address that the employee is not meeting the required standard and to agree a structured improvement plan. The tone should be supportive — this is not a disciplinary hearing.' },
+      { heading: 'Before the meeting', list: [
+        'Issue a written invitation with reasonable notice',
+        'State this is a formal capability meeting',
+        'Confirm the right to be accompanied or represented by a union rep or colleague',
+        'Prepare specific examples of where the standard has not been met'
+      ]},
+      { heading: 'At the meeting', list: [
+        'Present the concern with examples',
+        'Allow the employee to respond fully',
+        'Explore any underlying reasons including health or personal circumstances',
+        'Agree a PIP with specific, measurable targets',
+        'Set a clear review date',
+        'Confirm what support will be provided'
+      ]},
+      { heading: 'After the meeting', list: [
+        'Confirm the outcome and PIP in writing',
+        'Confirm the right of appeal'
+      ]},
+      { heading: 'Legal reference', links: [
+        { label: 'Ten Yards Legal — Disciplinary procedures Malta', meta: 'tenyardslegal.com', url: 'https://www.tenyardslegal.com/post/handling-disciplinary-actions-in-malta-a-practical-guide-for-employers' }
+      ]}
+    ]
+  },
+
+  'cap-reviews': {
+    tag: 'Capability', tagColor: '#042C53', tagBg: '#daeaf8',
+    title: 'Review meetings',
+    sections: [
+      { heading: 'Why this matters', text: 'The Industrial Tribunal will scrutinise whether the employer gave the employee a genuine opportunity to improve with proper support. Documented reviews are your evidence.' },
+      { heading: 'What to do at each review', list: [
+        'Compare performance against PIP targets specifically',
+        'Note what has improved and what has not',
+        'Record what support has been provided',
+        'Agree any adjustments if circumstances have changed',
+        'Confirm the next review date in writing'
+      ]},
+      { heading: 'Malta context', diff: 'The Industrial Tribunal applies a "good and sufficient cause" test to dismissals. Demonstrating a sustained, documented effort to support improvement is essential evidence that your cause was good and sufficient.' }
+    ]
+  },
+
+  'cap-first': {
+    tag: 'Capability', tagColor: '#042C53', tagBg: '#daeaf8',
+    title: 'First written warning',
+    sections: [
+      { heading: 'When to issue', text: 'Issued when the first review period ends and the employee has not made sufficient improvement against PIP targets.' },
+      { heading: 'The warning must confirm', list: [
+        'The nature of the capability concern',
+        'What improvement is required and by when',
+        'The support that will continue to be provided',
+        'The duration the warning will remain active',
+        'What will happen if improvement is not made',
+        'The right of appeal'
+      ]},
+      { heading: 'Malta context', diff: 'Maltese case law suggests a sequence of up to three written warnings over a six to twelve month period before dismissal demonstrates the required procedural prudence. One written warning followed immediately by dismissal is likely to be challenged at the Industrial Tribunal.' }
+    ]
+  },
+
+  'cap-second': {
+    tag: 'Capability', tagColor: '#042C53', tagBg: '#daeaf8',
+    title: 'Second written warning',
+    sections: [
+      { heading: 'When to issue', text: 'Issued when the employee has not made sufficient improvement following the first written warning and further review period.' },
+      { heading: 'What it must confirm', list: [
+        'All the same elements as the first warning',
+        'That this is a second written warning',
+        'The escalating consequences if improvement is not made',
+        'Continued support offered',
+        'Right of appeal'
+      ]},
+      { heading: 'Malta context', diff: 'This warning is particularly important under Maltese law. The Industrial Tribunal expects to see a clear progression of warnings over time before dismissal is considered. Skipping this stage is a significant procedural risk.' }
+    ]
+  },
+
+  'cap-final': {
+    tag: 'Capability', tagColor: '#042C53', tagBg: '#daeaf8',
+    title: 'Final written warning',
+    sections: [
+      { heading: 'When to issue', text: 'Issued when the employee has still not met the required standard after two prior written warnings.' },
+      { heading: 'What it must confirm', list: [
+        'That this is a final written warning',
+        'That dismissal is the next step if the standard is not met',
+        'The review period and what success looks like',
+        'Right of appeal'
+      ]},
+      { heading: 'Important', warning: 'The employee must be absolutely clear in writing that dismissal will follow. Vague language at this stage is a common reason Maltese tribunal cases are lost.' },
+      { heading: 'Legal reference', links: [
+        { label: 'Lexology — Malta termination and warnings', meta: 'lexology.com', url: 'https://www.lexology.com/library/detail.aspx?g=3ff60831-b121-4192-94ab-a0139e301265' }
+      ]}
+    ]
+  },
+
+  'cap-dismissal': {
+    tag: 'Capability', tagColor: '#4A1B0C', tagBg: '#fce8e0',
+    title: 'Dismissal on capability grounds',
+    sections: [
+      { heading: 'Legal test', text: 'Under EIRA Article 36(14), dismissal must be for "good and sufficient cause." For capability, this means demonstrating that despite a fair process, genuine support, and multiple warnings, the employee has not met the required standard.' },
+      { heading: 'The process', list: [
+        'Issue a charge letter confirming dismissal is a possible outcome',
+        'Hold a formal hearing with right to be accompanied',
+        'Allow the employee to respond before deciding',
+        'Adjourn before reaching a decision',
+        'Confirm the outcome in writing with full reasons',
+        'Confirm notice entitlement — notice is required unless serious misconduct',
+        'Confirm the right of appeal'
+      ]},
+      { heading: 'Notice periods under EIRA', list: [
+        'Up to 6 months service — 1 week',
+        '6 months to 2 years — 2 weeks',
+        '2 to 4 years — 4 weeks',
+        '4 to 7 years — 8 weeks',
+        '7 years and above — increases further by length of service'
+      ]},
+      { heading: 'If the employee wins at tribunal', warning: 'Under EIRA, an employee on an indefinite contract who wins an unfair dismissal claim can seek reinstatement, re-engagement, or compensation. Reinstatement is a real remedy in Malta — unlike the UK where it is rarely ordered.' },
+      { heading: 'Legal reference', links: [
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' },
+        { label: 'BDO Malta — Termination guidance', meta: 'bdo.com.mt', url: 'https://www.bdo.com.mt/en-gb/insights/termination-of-employment' }
+      ]}
+    ]
+  },
+
+  hearing: {
+    tag: 'Conduct', tagColor: '#4A1B0C', tagBg: '#fce8e0',
+    title: 'Disciplinary hearing',
+    sections: [
+      { heading: 'Before the hearing', list: [
+        'Issue a charge letter — this is a legal requirement in Malta',
+        'The letter must detail the specific allegations clearly enough for the employee to prepare a defence',
+        'State the possible outcomes including dismissal if applicable',
+        'Confirm the date, time and location',
+        'Confirm the right to be accompanied or represented by a union rep or colleague'
+      ]},
+      { heading: 'At the hearing', list: [
+        'Present the evidence and explain the concern',
+        'Give the employee the full opportunity to respond',
+        'Allow their representative to speak on their behalf',
+        'Ask questions and allow the employee to ask questions',
+        'Adjourn before reaching any decision'
+      ]},
+      { heading: 'After adjourning', list: [
+        'Consider all evidence and the employee\'s response',
+        'Confirm the outcome in writing with full reasons',
+        'Confirm the right of appeal'
+      ]},
+      { heading: 'Important', warning: 'The Industrial Tribunal has found dismissals unfair where the employee was not given adequate notice of the hearing agenda, was not told what the allegations were in sufficient detail, or was not given a genuine opportunity to respond. All of these are procedural requirements, not best practice.' },
+      { heading: 'Legal reference', links: [
+        { label: 'GVZH — Why disciplinary procedures are essential', meta: 'gvzh.mt', url: 'https://gvzh.mt/insights/why-disciplinary-procedures-essential-fair-dismissal/' },
+        { label: 'AE Legal — Charge letters and disciplinary process', meta: 'aelegal.com.mt', url: 'https://aelegal.com.mt/why-is-a-disciplinary-process-important-for-dismissals' }
+      ]}
+    ]
+  },
+
+  'con-first': {
+    tag: 'Conduct', tagColor: '#4A1B0C', tagBg: '#fce8e0',
+    title: 'First written warning',
+    sections: [
+      { heading: 'When to issue', text: 'The concern has been upheld following a disciplinary hearing and formal action is warranted.' },
+      { heading: 'The warning must confirm', list: [
+        'The specific conduct concern',
+        'What behaviour must change',
+        'The duration the warning remains active',
+        'What will happen if the behaviour continues',
+        'The right of appeal'
+      ]},
+      { heading: 'Malta context', diff: 'Maltese case law indicates that a verbal warning followed by up to three written warnings before dismissal is considered a proportionate and legally prudent approach. Jumping to dismissal after a single warning significantly increases tribunal risk.' }
+    ]
+  },
+
+  'con-second': {
+    tag: 'Conduct', tagColor: '#4A1B0C', tagBg: '#fce8e0',
+    title: 'Second written warning',
+    sections: [
+      { heading: 'When to issue', text: 'Further issues have arisen while a first written warning is active, or the original conduct was serious enough to escalate directly.' },
+      { heading: 'The warning must confirm', list: [
+        'All the same elements as the first warning',
+        'That this is a second warning',
+        'The escalating consequences of further issues',
+        'Right of appeal'
+      ]},
+      { heading: 'Malta context', diff: 'This is a significant milestone under Maltese law. The pattern of verbal warning, then written warnings in sequence, is what the Industrial Tribunal looks for as evidence of a fair and proportionate process.' }
+    ]
+  },
+
+  'con-final': {
+    tag: 'Conduct', tagColor: '#4A1B0C', tagBg: '#fce8e0',
+    title: 'Final written warning',
+    sections: [
+      { heading: 'When to issue', text: 'Further issues after a second written warning, or conduct serious enough to escalate directly to a final warning.' },
+      { heading: 'What it must confirm', list: [
+        'That this is a final warning',
+        'That dismissal is the next step',
+        'Right of appeal'
+      ]},
+      { heading: 'Important', warning: 'The employee must be left in absolutely no doubt that dismissal follows any further breach. This must be explicit and in writing.' }
+    ]
+  },
+
+  'con-dismissal': {
+    tag: 'Conduct', tagColor: '#4A1B0C', tagBg: '#fce8e0',
+    title: 'Dismissal on conduct grounds',
+    sections: [
+      { heading: 'Legal test', text: 'Dismissal must be for "good and sufficient cause" under EIRA Article 36(14). The burden of proof falls on the employer to demonstrate this.' },
+      { heading: 'The process', list: [
+        'Issue a charge letter confirming dismissal is a possible outcome',
+        'Hold a formal hearing with right to be accompanied',
+        'Allow the employee to respond fully',
+        'Adjourn before deciding',
+        'Confirm in writing with full reasons',
+        'Confirm notice entitlement',
+        'Confirm the right of appeal'
+      ]},
+      { heading: 'Notice on conduct dismissal', diff: 'Unlike the UK, notice is generally required in Malta even on conduct dismissal unless the conduct amounts to serious misconduct justifying immediate dismissal. See the notice periods under EIRA.' },
+      { heading: 'If the employee wins at tribunal', warning: 'An employee on an indefinite contract who wins an unfair dismissal claim can seek reinstatement, re-engagement, or compensation from the Industrial Tribunal. Reinstatement is a genuine remedy under Maltese law.' },
+      { heading: 'Legal reference', links: [
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' },
+        { label: 'Empleo — Unfair dismissal Malta', meta: 'empleo.com.mt', url: 'https://empleo.com.mt/employer_services/unfair-dismissal/' }
+      ]}
+    ]
+  },
+
+  gross: {
+    tag: 'Serious Misconduct', tagColor: '#501313', tagBg: '#fce8e8',
+    title: 'Serious misconduct',
+    sections: [
+      { heading: 'What it means in Malta', text: 'Maltese law does not define "good and sufficient cause" but recognises that some conduct is so serious it may justify immediate dismissal without prior warnings. However the Industrial Tribunal examines each case on its merits.' },
+      { heading: 'Examples', list: [
+        'Theft, fraud or serious dishonesty',
+        'Physical violence or threatening behaviour',
+        'Serious harassment or bullying',
+        'Deliberate damage to company property',
+        'Serious breach of confidentiality',
+        'Being under the influence of drugs or alcohol at work'
+      ]},
+      { heading: 'Process is still required', warning: 'Even for serious misconduct, Maltese law requires a fair process — charge letter, hearing, right to respond, right to be accompanied, written outcome, right of appeal. The Industrial Tribunal has found dismissals unfair even where the misconduct was proven, because the process was not followed.' },
+      { heading: 'Notice on serious misconduct', diff: 'Dismissal for serious misconduct is one of the only circumstances in Malta where notice may not be required. However this is determined case by case — seek legal advice before proceeding without notice.' },
+      { heading: 'Legal reference', links: [
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' },
+        { label: 'BDO Malta — Good and sufficient cause', meta: 'bdo.com.mt', url: 'https://www.bdo.com.mt/en-gb/insights/termination-of-employment' }
+      ]}
+    ]
+  },
+
+  appeal: {
+    tag: 'Both tracks', tagColor: '#2c2c2a', tagBg: '#e8e6e0',
+    title: 'Right of appeal and Industrial Tribunal',
+    sections: [
+      { heading: 'Internal appeal', text: 'The employee should be offered the right to appeal any formal outcome internally. The appeal should be heard by someone not previously involved where possible. Confirm the outcome of the appeal in writing.' },
+      { heading: 'Industrial Tribunal — Malta specific', warning: 'If internal resolution fails, the employee can bring a claim to the Industrial Tribunal under EIRA. The Tribunal has exclusive jurisdiction over unfair dismissal claims in Malta. Unlike the UK, there is no qualifying period of service required to bring a claim — employees are protected from day one on an indefinite contract.' },
+      { heading: 'Tribunal remedies', list: [
+        'Reinstatement — return to the same role',
+        'Re-engagement — return to a comparable role',
+        'Compensation — financial award',
+        'The Tribunal decides which remedy is appropriate based on the circumstances'
+      ]},
+      { heading: 'Burden of proof', diff: 'In Malta, the burden of proof falls on the employer to demonstrate that the dismissal was for good and sufficient cause and that the process was fair. Document everything at every stage.' },
+      { heading: 'Legal reference', links: [
+        { label: 'EIRA Chapter 452 — Laws of Malta', meta: 'legislation.mt', url: 'https://legislation.mt/eli/cap/452/eng/pdf' },
+        { label: 'Empleo — Unfair dismissal and tribunal', meta: 'empleo.com.mt', url: 'https://empleo.com.mt/employer_services/unfair-dismissal/' }
+      ]}
+    ]
+  }
+
+};
+
+function openModal(id) {
+  const data = modals[id];
+  if (!data) return;
+  document.getElementById('modalTag').textContent = data.tag;
+  document.getElementById('modalTag').style.background = data.tagBg;
+  document.getElementById('modalTag').style.color = data.tagColor;
+  document.getElementById('modalTitle').textContent = data.title;
+  let html = '';
+  data.sections.forEach(s => {
+    html += '<div class="modal-section">';
+    html += '<h3>' + s.heading + '</h3>';
+    if (s.text)    html += '<p>' + s.text + '</p>';
+    if (s.warning) html += '<div class="warning-box">⚠️ ' + s.warning + '</div>';
+    if (s.diff)    html += '<div class="diff-box">🇲🇹 ' + s.diff + '</div>';
+    if (s.list) {
+      html += '<ul>';
+      s.list.forEach(item => { html += '<li>' + item + '</li>'; });
+      html += '</ul>';
+    }
+    if (s.links) {
+      html += '<div class="modal-links">';
+      s.links.forEach(link => {
+        html += '<a class="modal-link" href="' + link.url + '" target="_blank" rel="noopener">';
+        html += '<span>↗</span>';
+        html += '<span><div>' + link.label + '</div><div class="link-meta">' + link.meta + '</div></span>';
+        html += '</a>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalBox').scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
